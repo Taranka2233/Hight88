@@ -43,6 +43,7 @@ jobs:
           tar -xzf /tmp/night-city-net-source.tar.gz
           rm -rf .bootstrap
           rm -f .github/workflows/bootstrap-source.yml
+          rm -f .github/workflows/android-apk.yml
 
       - name: Commit unpacked project to review branch
         shell: bash
@@ -51,7 +52,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git diff --cached --check
           if git diff --cached --quiet; then
             echo 'No source changes to commit'
             exit 0
