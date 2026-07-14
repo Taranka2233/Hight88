@@ -1,0 +1,42 @@
+name: Bootstrap Night City Net source
+
+on:
+  push:
+    branches:
+      - agent/night-city-net-foundation
+
+permissions:
+  contents: write
+
+jobs:
+  unpack:
+    if: ${{ hashFiles('.bootstrap/chunk-00') != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout review branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/night-city-net-foundation
+          fetch-depth: 0
+
+      - name: Reconstruct source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .bootstrap/chunk-* | base64 --decode > /tmp/night-city-net-source.tar.gz
+          tar -xzf /tmp/night-city-net-source.tar.gz
+          rm -rf .bootstrap
+
+      - name: Commit unpacked project
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No source changes to commit"
+            exit 0
+          fi
+          git commit -m "add Night City Net foundation"
+          git push origin HEAD:agent/night-city-net-foundation
