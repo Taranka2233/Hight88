@@ -30,7 +30,16 @@ jobs:
           set -euo pipefail
           test -f .bootstrap/chunk-00
           test -f .bootstrap/chunk-07
+          for part in .bootstrap/chunk-*; do
+            printf '%s ' "$part"
+            git hash-object "$part"
+          done
           cat .bootstrap/chunk-* | base64 --decode > /tmp/night-city-net-source.tar.gz
+          printf 'archive bytes: '
+          wc -c < /tmp/night-city-net-source.tar.gz
+          printf 'archive sha256: '
+          sha256sum /tmp/night-city-net-source.tar.gz
+          echo '59da07abf054f6be923ccef574e6161a130045eab55fe692b010ebd87a940fee  /tmp/night-city-net-source.tar.gz' | sha256sum --check
           gzip -t /tmp/night-city-net-source.tar.gz
           tar -tzf /tmp/night-city-net-source.tar.gz > /tmp/archive-files.txt
           if grep -Eq '(^|/)\.git(/|$)|(^|/)\.github/workflows/bootstrap-night-city-net\.yml$' /tmp/archive-files.txt; then
