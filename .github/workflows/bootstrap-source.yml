@@ -1,9 +1,10 @@
 name: Bootstrap Night City Net source
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/night-city-net-foundation
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: write
