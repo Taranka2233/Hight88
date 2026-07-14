@@ -1,0 +1,23 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() { return request.auth != null; }
+    function isMember(chatId) {
+      return signedIn()
+        && request.auth.uid in firestore.get(/databases/(default)/documents/chats/$(chatId)).data.memberIds;
+    }
+    match /chat-media/{chatId}/{messageId}/{fileName} {
+      allow read: if isMember(chatId);
+      allow create: if isMember(chatId)
+        && request.resource.size < 100 * 1024 * 1024
+        && request.resource.metadata.authorId == request.auth.uid
+        && request.resource.metadata.chatId == chatId;
+      allow update: if false;
+      allow delete: if isMember(chatId) && resource.metadata.authorId == request.auth.uid;
+    }
+    match /avatars/{userId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == userId && request.resource.size < 10 * 1024 * 1024;
+    }
+  }
+}
